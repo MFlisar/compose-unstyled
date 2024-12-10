@@ -28,7 +28,8 @@ import com.composables.core.SheetDetent.Companion.FullyExpanded
 import com.composables.core.SheetDetent.Companion.Hidden
 
 private val Peek = SheetDetent("peek") { containerHeight, sheetHeight ->
-    containerHeight * 0.5f
+    println("TEST - Peek - containerHeight = $containerHeight | sheetHeight = $sheetHeight")
+    containerHeight * 0.6f
 }
 
 @Composable
@@ -38,28 +39,12 @@ fun ModalBottomSheetDemo() {
             .fillMaxSize()
             .background(Brush.linearGradient(listOf(Color(0xFF800080), Color(0xFFDA70D6))))
     ) {
-
-        val expandInitially = true
-        val dismissAllowed = remember { mutableStateOf(true) }
-
-
-        val shouldDismissOnBackPress by remember {
-            derivedStateOf { dismissAllowed.value }
-        }
-        val shouldDismissOnClickOutside by remember {
-            derivedStateOf {  dismissAllowed.value }
-        }
-
-
         val modalSheetState = rememberModalBottomSheetState(
-            initialDetent = if (expandInitially || Peek == null) SheetDetent.FullyExpanded else Peek,
+            initialDetent = Peek,
             detents = listOf(Hidden, Peek, FullyExpanded),
             confirmDetentChange = {
-                val confirm = if (it == SheetDetent.Hidden) {
-                    true
-                } else true
-                println("TEST - confirmDetentChange = $confirm | ${it.identifier}")
-                confirm
+                println("TEST - confirmDetentChange - ${it.identifier}")
+                true
             }
         )
 
@@ -77,18 +62,6 @@ fun ModalBottomSheetDemo() {
 
         val isCompact = maxWidth < 600.dp
 
-        LaunchedEffect(modalSheetState.isIdle) {
-
-            println("TEST - isIdle = ${modalSheetState.isIdle} | target = ${modalSheetState.currentDetent.identifier}")
-            if (modalSheetState.isIdle &&
-                modalSheetState.currentDetent == SheetDetent.Hidden
-            ) {
-                println("TEST - show again")
-                modalSheetState.currentDetent = SheetDetent.FullyExpanded
-                //bottomSheetState.animateTo(SheetDetent.FullyExpanded)
-            }
-        }
-
         LaunchedEffect(modalSheetState.offset) {
             println("TEST - bottomSheetState.offset = ${modalSheetState.offset}")
         }
@@ -102,10 +75,6 @@ fun ModalBottomSheetDemo() {
 
         ModalBottomSheet(
             state = modalSheetState,
-            properties = ModalSheetProperties(
-                dismissOnBackPress = shouldDismissOnBackPress,
-                dismissOnClickOutside = shouldDismissOnClickOutside
-            ),
             onDismiss = {
                 println("TEST - onDismiss callback...")
             }
@@ -126,15 +95,19 @@ fun ModalBottomSheetDemo() {
                     .fillMaxWidth()
                     .imePadding(),
             ) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                    Column {
+                Box(Modifier.fillMaxWidth().height(86.dp), contentAlignment = Alignment.TopCenter) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         DragIndication(
                             modifier = Modifier.padding(top = 22.dp)
                                 .background(Color.Black.copy(0.4f), RoundedCornerShape(100))
                                 .width(32.dp)
                                 .height(4.dp)
                         )
-                        BasicText("Content")
+                        repeat(1) {
+                            BasicText("Line ${it + 1}")
+                        }
                     }
                 }
             }
